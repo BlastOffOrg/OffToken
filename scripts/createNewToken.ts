@@ -32,12 +32,12 @@ async function registerAndDeploy() {
   const salt = '0x' + crypto.randomBytes(32).toString('hex')
 
   // Create a new token
-  const name = 'New Interchain Token'
-  const symbol = 'NIT'
+  const name = 'OFF'
+  const symbol = 'OFF'
   const decimals = 18
 
   // Intial token supply
-  const initialSupply = parseEther('1000')
+  const initialSupply = parseEther('10000000')
 
   // Get a signer to sign the transaction
   const signer = await getSigner()
@@ -86,18 +86,12 @@ async function registerAndDeploy() {
   )
 }
 
-const api = new AxelarQueryAPI({ environment: Environment.TESTNET })
+const api = new AxelarQueryAPI({ environment: Environment.MAINNET })
 
 // Estimate gas costs.
 async function gasEstimator() {
-  const gas = await api.estimateGasFee(
-    EvmChain.SEPOLIA,
-    EvmChain.BLAST_SEPOLIA,
-    GasToken.ETH,
-    700000,
-    1.1
-  )
-
+  const gas = await api.estimateGasFee(EvmChain.ETHEREUM, EvmChain.BLAST, GasToken.ETH, 700000, 1.1)
+  console.log('gas', gas)
   return gas
 }
 
@@ -118,16 +112,16 @@ async function deployToRemoteChain() {
   console.log('gas', gasAmount)
 
   // Salt value from registerAndDeploy(). Replace with your own
-  const salt = '0x4bc4c3cb44cd2a48c1cd8325969b12bb00cc689c2a3e6189387ce4adca0d548a'
+  const salt = '0x64dd14af87bf66ff8421092d43f4d20786514bc9ac98035efcb77854d0e1733a'
 
   // Initiate transaction
   const txn = await interchainTokenFactoryContract.deployRemoteInterchainToken(
-    'Ethereum Sepolia',
+    'Ethereum',
     salt,
     signer.address,
-    'Blast Sepolia Testnet',
-    Number(gasAmount) * 2,
-    { value: Number(gasAmount) * 2 }
+    'blast',
+    gasAmount,
+    { value: gasAmount }
   )
 
   console.log(`Transaction Hash: ${txn.hash}`)
@@ -138,7 +132,7 @@ async function transferTokens() {
   const signer = await getSigner()
 
   const interchainToken = await getContractInstance(
-    '0x4D5361D08321d51e3821D7BCe23d711b594767e7', // Update with new token address
+    '0xD55eDfc79c0d14084260D16f38BdA75e28AbFb6A', // Update with new token address
     interchainTokenContractABI, // Interchain Token contract ABI
     signer
   )
@@ -148,9 +142,9 @@ async function transferTokens() {
 
   // Initate transfer via token
   const transfer = await interchainToken.interchainTransfer(
-    'Polygon', // Destination chain
-    '0x2d33B6d215B2aF28e4Ce2b1E02C62e8793750F6C', // Update with your own wallet address
-    parseEther('25'), // Transfer 25 tokens
+    'blast', // Destination chain
+    '0x8b736035BbDA71825e0219f5FE4DfB22C35FbDDC', // Update with your own wallet address
+    parseEther('1'), // Transfer 25 tokens
     '0x', // Empty data payload
     { value: gasAmount } // Transaction options
   )
@@ -182,6 +176,60 @@ async function deployTokenManager() {
   console.log('token manager', tokenManager)
 }
 
+async function registerCanonicalInterchainToken() {
+  const signer = await getSigner()
+  const gasValue = await gasEstimator()
+
+  const interchainTokenFactoryContract = await getContractInstance(
+    interchainTokenFactoryContractAddress,
+    interchainTokenFactoryContractABI,
+    signer
+  )
+  const tx = await interchainTokenFactoryContract.registerCanonicalInterchainToken(
+    '0x1bF94dCe1bbC06340aEe9D658898CCa25F523A4c',
+    { value: gasValue }
+  )
+
+  console.log('tx', tx)
+}
+
+async function deployRemoteCanonicalInterchainToken() {
+  const signer = await getSigner()
+  const gasValue = await gasEstimator()
+
+  const interchainTokenFactoryContract = await getContractInstance(
+    interchainTokenFactoryContractAddress,
+    interchainTokenFactoryContractABI,
+    signer
+  )
+  const tx = await interchainTokenFactoryContract.deployRemoteCanonicalInterchainToken(
+    'Ethereum Sepolia',
+    '0x1bF94dCe1bbC06340aEe9D658898CCa25F523A4c',
+    'Blast Sepolia Testnet',
+    gasValue,
+    { value: gasValue }
+  )
+
+  console.log('tx', tx)
+}
+
+async function mintToken() {
+  // Get signer
+  const signer = await getSigner()
+
+  const interchainToken = await getContractInstance(
+    '0x85BF3062205950F309954e12dFE9E538BfAE13C4', // Update with new token address
+    interchainTokenContractABI, // Interchain Token contract ABI
+    signer
+  )
+  // Initate transfer via token
+  const transfer = await interchainToken.mint(
+    '0x8b736035BbDA71825e0219f5FE4DfB22C35FbDDC',
+    parseEther('1000')
+  )
+  console.log('Transfer Transaction Hash:', transfer.hash)
+}
+
 async function main() {
   const functionName = process.env.FUNCTION_NAME
   switch (functionName) {
@@ -197,8 +245,18 @@ async function main() {
     case 'deployTokenManager':
       await deployTokenManager()
       break
-    case 'gasEstimate':
+    case 'gasEstimator':
       await gasEstimator()
+      break
+    case 'registerCanonicalInterchainToken':
+      await registerCanonicalInterchainToken()
+      break
+    case 'deployRemoteCanonicalInterchainToken':
+      await deployRemoteCanonicalInterchainToken()
+      break
+    //mintToken()
+    case 'mintToken':
+      await mintToken()
       break
     default:
       console.error(`Unknown function: ${functionName}`)

@@ -39,6 +39,10 @@ const config: HardhatUserConfig = {
       url: 'https://rpc.ankr.com/fantom_testnet',
       chainId: 4002,
       accounts: [process.env.PR_KEY || '']
+    },
+    mainnet: {
+      url: 'https://rpc.ankr.com/eth',
+      accounts: [process.env.PR_KEY || '']
     }
   },
   solidity: {
@@ -58,7 +62,8 @@ const config: HardhatUserConfig = {
       base: process.env.ETHERSCAN_API_KEY || '',
       baseGoerli: process.env.ETHERSCAN_API_KEY || '',
       sepolia: process.env.ETHERSCAN_API_KEY || '',
-      blastTest: 'blast_sepolia'
+      blastTest: 'blast_sepolia',
+      mainnet: process.env.ETHERSCAN_API_KEY || ''
     },
     customChains: [
       {
