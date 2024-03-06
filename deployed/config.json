@@ -1,0 +1,8 @@
+{
+  "sepolia": {
+    "itsToken": "0x1bF94dCe1bbC06340aEe9D658898CCa25F523A4c"
+  },
+  "blastTest": {
+    "itsToken": "0x03Bf6E95090fd4CBe1E7BdB2B2228113303C0C5f"
+  }
+}
