@@ -151,85 +151,6 @@ async function transferTokens() {
   console.log('Transfer Transaction Hash:', transfer.hash)
 }
 
-async function deployTokenManager() {
-  // Generate random salt
-  const salt = '0x' + crypto.randomBytes(32).toString('hex')
-
-  const signer = await getSigner()
-  const interchainTokenServiceContract = await getContractInstance(
-    interchainTokenServiceContractAddress,
-    interchainTokenServiceContractABI,
-    signer
-  )
-
-  const gasValue = await gasEstimator()
-
-  const tokenManager = await interchainTokenServiceContract.deployTokenManager(
-    salt,
-    'Blast Sepolia Testnet', //sepolia
-    0,
-    '0x000000000000000000000000000000000000000000000000000000000000004000000000000000000000000003bf6e95090fd4cbe1e7bdb2b2228113303c0c5f00000000000000000000000000000000000000000000000000000000000000148b736035bbda71825e0219f5fe4dfb22c35fbddc000000000000000000000000',
-    gasValue,
-    { value: gasValue }
-  )
-
-  console.log('token manager', tokenManager)
-}
-
-async function registerCanonicalInterchainToken() {
-  const signer = await getSigner()
-  const gasValue = await gasEstimator()
-
-  const interchainTokenFactoryContract = await getContractInstance(
-    interchainTokenFactoryContractAddress,
-    interchainTokenFactoryContractABI,
-    signer
-  )
-  const tx = await interchainTokenFactoryContract.registerCanonicalInterchainToken(
-    '0x1bF94dCe1bbC06340aEe9D658898CCa25F523A4c',
-    { value: gasValue }
-  )
-
-  console.log('tx', tx)
-}
-
-async function deployRemoteCanonicalInterchainToken() {
-  const signer = await getSigner()
-  const gasValue = await gasEstimator()
-
-  const interchainTokenFactoryContract = await getContractInstance(
-    interchainTokenFactoryContractAddress,
-    interchainTokenFactoryContractABI,
-    signer
-  )
-  const tx = await interchainTokenFactoryContract.deployRemoteCanonicalInterchainToken(
-    'Ethereum Sepolia',
-    '0x1bF94dCe1bbC06340aEe9D658898CCa25F523A4c',
-    'Blast Sepolia Testnet',
-    gasValue,
-    { value: gasValue }
-  )
-
-  console.log('tx', tx)
-}
-
-async function mintToken() {
-  // Get signer
-  const signer = await getSigner()
-
-  const interchainToken = await getContractInstance(
-    '0x85BF3062205950F309954e12dFE9E538BfAE13C4', // Update with new token address
-    interchainTokenContractABI, // Interchain Token contract ABI
-    signer
-  )
-  // Initate transfer via token
-  const transfer = await interchainToken.mint(
-    '0x8b736035BbDA71825e0219f5FE4DfB22C35FbDDC',
-    parseEther('1000')
-  )
-  console.log('Transfer Transaction Hash:', transfer.hash)
-}
-
 async function main() {
   const functionName = process.env.FUNCTION_NAME
   switch (functionName) {
@@ -242,21 +163,9 @@ async function main() {
     case 'transferTokens':
       await transferTokens()
       break
-    case 'deployTokenManager':
-      await deployTokenManager()
-      break
+
     case 'gasEstimator':
       await gasEstimator()
-      break
-    case 'registerCanonicalInterchainToken':
-      await registerCanonicalInterchainToken()
-      break
-    case 'deployRemoteCanonicalInterchainToken':
-      await deployRemoteCanonicalInterchainToken()
-      break
-    //mintToken()
-    case 'mintToken':
-      await mintToken()
       break
     default:
       console.error(`Unknown function: ${functionName}`)
