@@ -90,7 +90,13 @@ const api = new AxelarQueryAPI({ environment: Environment.MAINNET })
 
 // Estimate gas costs.
 async function gasEstimator() {
-  const gas = await api.estimateGasFee(EvmChain.ETHEREUM, EvmChain.BLAST, GasToken.ETH, 700000, 1.1)
+  const gas = await api.estimateGasFee(
+    EvmChain.ETHEREUM,
+    EvmChain.POLYGON,
+    GasToken.ETH,
+    700000,
+    1.1
+  )
   console.log('gas', gas)
   return gas
 }
@@ -119,7 +125,7 @@ async function deployToRemoteChain() {
     'Ethereum',
     salt,
     signer.address,
-    'blast',
+    'Polygon',
     gasAmount,
     { value: gasAmount }
   )
@@ -142,7 +148,7 @@ async function transferTokens() {
 
   // Initate transfer via token
   const transfer = await interchainToken.interchainTransfer(
-    'blast', // Destination chain
+    'Polygon', // Destination chain
     '0x8b736035BbDA71825e0219f5FE4DfB22C35FbDDC', // Update with your own wallet address
     parseEther('1'), // Transfer 25 tokens
     '0x', // Empty data payload

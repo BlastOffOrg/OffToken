@@ -40,6 +40,11 @@ const config: HardhatUserConfig = {
       chainId: 4002,
       accounts: [process.env.PR_KEY || '']
     },
+    polygon: {
+      url: 'https://polygon-rpc.com',
+      chainId: 137,
+      accounts: [process.env.PR_KEY || '']
+    },
     mainnet: {
       url: 'https://rpc.ankr.com/eth',
       accounts: [process.env.PR_KEY || '']
@@ -63,7 +68,8 @@ const config: HardhatUserConfig = {
       baseGoerli: process.env.ETHERSCAN_API_KEY || '',
       sepolia: process.env.ETHERSCAN_API_KEY || '',
       blastTest: 'blast_sepolia',
-      mainnet: process.env.ETHERSCAN_API_KEY || ''
+      mainnet: process.env.ETHERSCAN_API_KEY || '',
+      polygon: process.env.ETHERSCAN_API_KEY || ''
     },
     customChains: [
       {
